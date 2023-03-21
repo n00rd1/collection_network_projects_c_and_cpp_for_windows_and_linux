@@ -127,8 +127,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Win_Old_TFTP_project.cpp" />
-    <ClCompile Include="Win_TFTP_project_on_c.cpp" />
+    <ClCompile Include="Win_Old_TFTP_project.c" />
+    <ClCompile Include="Win_TFTP_project_on_c.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

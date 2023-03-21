@@ -1,1 +1,0 @@
-# Some_Cpp_projects_VS2022
