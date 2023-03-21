@@ -1,1 +1,2 @@
-﻿  Win_Old_TFTP_project.c
+﻿  Win_TFTP_project_on_c.c
+C:\Users\Arseniy\Documents\_coding\Some_Cpp_projects_VS2022\Win_TFTP_project_on_c\Win_TFTP_project_on_c.c(81,57): warning C4267: функция: преобразование из "size_t" в "int"; возможна потеря данных

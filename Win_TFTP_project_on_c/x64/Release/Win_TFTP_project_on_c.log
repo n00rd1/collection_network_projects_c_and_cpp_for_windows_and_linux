@@ -1,0 +1,4 @@
+﻿  Win_TFTP_project_on_c.c
+C:\Users\Arseniy\Documents\_coding\Some_Cpp_projects_VS2022\Win_TFTP_project_on_c\Win_TFTP_project_on_c.c(268,24): warning C4090: return: разные квалификаторы "const"
+C:\Users\Arseniy\Documents\_coding\Some_Cpp_projects_VS2022\Win_TFTP_project_on_c\Win_TFTP_project_on_c.c(211,27): error C4996: 'inet_addr': Use inet_pton() or InetPton() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
+C:\Users\Arseniy\Documents\_coding\Some_Cpp_projects_VS2022\Win_TFTP_project_on_c\Win_TFTP_project_on_c.c(202,10): warning C4101: data: неиспользованная локальная переменная
