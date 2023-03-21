@@ -1,6 +1,7 @@
 ﻿// TFTP (IP4) server with UDP packets
 // This server is designed to transfer files over the TFTP protocol (used inside a local network)
-#define _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS		// Error with use a scanf
+#pragma warning(disable: 4013)		// On 227 line is a error of inet_pton
 
 #include <stdio.h>
 #include <stdint.h>
@@ -8,7 +9,7 @@
 #include <windows.h>
 
 #define DIR_OF_FILE		"C:\\tftp\\1.txt"		// default folder for tftp files
-#define CLIENT_DEF_IP4	"192.168.1.1"
+#define CLIENT_DEF_IP4	"192.168.1.1"			// default ip client
 #define SERVER_DEF_IP4	"192.168.1.2"
 #define DEF_TIMEOUT		50
 
@@ -17,9 +18,21 @@
 #define PORT_2			4259
 
 // error code
-const char* error_str[] = {
+char* error_str[] = {
 	"OK",										// All ok
-	"err1"
+	"Conversion error",							// Error of conver from str ip4 to binary ip4
+	"WSAStartup failed",
+	"Socket function failed",
+	"Bind failed",
+	"Timeout of packet",
+	"Error of waiting a packet",
+	"Error of geting a request packet",
+	"Error get a error packet",
+	"",
+	"Error of open a file descriptor",
+	"",
+	"",
+	"Max of Errors packets"
 };
 
 // tftp transfer mode
@@ -162,7 +175,7 @@ FILE* file_open_by_request(tftp_message* m, int cnt, struct sockaddr_in client, 
 	// ---  Time of taking request (timeout)    --- //
 // socket: socket 
 // time: timeout for receive request
-int recvfromTimeOutUDP(SOCKET socket, long sec) {
+int recvest_from_TimeOut_UDP(SOCKET socket, long sec) {
 	// Setup timeval variable
 	struct fd_set fds;
 	struct timeval timeout;
@@ -186,65 +199,205 @@ int recvfromTimeOutUDP(SOCKET socket, long sec) {
 // client_ip: IP address of the client
 // server_ip: IP address of the server
 // stat: struct to store statistics of the server's performance
-char* tftp_server(int time, char* dir, char* client_ip, char* server_ip, struct stat* stat) {
-	FILE* fd = 0;
-	int sock = 0;						// socket for get a request and socket for send a request
-	WSADATA wsaData;
 
+char* tftp_server(int time, char* dir, char* client_ip, char* server_ip, struct stat* stat) {
+	FILE* fd = 0;								
+	WSADATA wsaData;				
+
+	int cnt = 0;								// Variable to save an answer of requests
 	int code = 0;
-	int timing = 0;		 					// timer, buffer, close
-	int cnt = 0;							// temp to save a answert of requests
+	int sock = 0;								// Socket for get a request and socket for send a request
+	int timing = 0;		 						// Timer, buffer, close
 
 	int dlen = 0;
-	int errors_number = 0;				// temp to check the number of errors
+	int errors_number = 0;						// Variable to check the number of errors
 	int c_len = 0;
 
-	uint8_t data[BUFLEN];                   // Buffer for data
-	uint16_t block_number = 0;              // Block number
+	uint8_t data[BUFLEN];						// Buffer for data
+	uint16_t block_number = 0;					// Block number
 
 	// Structures
-	struct sockaddr_in server = { 0 };				// Server
-	struct sockaddr_in client = { 0 };              // Real client ip address
+	struct sockaddr_in server = { 0 };			// Server ip address
+	struct sockaddr_in client = { 0 };          // Real client ip address
+	struct sockaddr_in client_tmp = { 0 };		// Temp to save a binary ip address of client IP4
 
 	// Set server IP address
 	server.sin_family = AF_INET;
-	server.sin_addr.s_addr = inet_addr(server_ip);
 	server.sin_port = htons(PORT_1);
+	if (inet_pton(AF_INET, server_ip, &server.sin_addr) == 0) {
+		code = 1;
+		goto close_all;							//all close
+	}
+
+	if (inet_pton(AF_INET, client_ip, &client_tmp.sin_addr) == 0) {
+		code = 1;
+		goto close_all;							//all close
+	}
 
 	// Structures for message
-	tftp_message get_m = { 0 };             // Structures for incoming message
-	tftp_message send_m = { 0 };            // Structures for outgoing message
+	tftp_message get_m = { 0 };					// Structures for incoming message
+	tftp_message send_m = { 0 };				// Structures for outgoing message
 
 	// Initialize Winsock
 	if ((cnt = WSAStartup(MAKEWORD(2, 2), &wsaData)) != 0) {
-		printf("WSAStartup failed: %d\n", cnt);
-		code = 1;
-		goto close_all;     //all close
+		code = 2;
+		goto close_all;							// Close everything
 	}
-
 
 	// Create a SOCKET for listening for incoming connection requests
 	if ((sock = (int)socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == INVALID_SOCKET) {
-		printf("socket function failed with error: %u\n", WSAGetLastError());
-		code = 2;
-		goto close_all;     //all close
+		//printf("socket function failed with error: %u\n", WSAGetLastError());
+		code = 3;
+		goto close_all;							// Close everything
 	}
 
 	// Bind the socket
 	if (bind(sock, (struct sockaddr*)&server, sizeof(server)) == SOCKET_ERROR) {
-		printf("Bind failed with error code : %d", WSAGetLastError());
-		code = 3;
-		goto close_all;     //all close
+		//printf("Bind failed with error code : %d", WSAGetLastError());
+		code = 4;
+		goto close_all;							// Close everything
 	}
 
-	printf("\rtftp server: listening on %d\n", ntohs(server.sin_port));
+	printf("\n\rtftp server: listening on %d\n", ntohs(server.sin_port));
 
 	// Get first true request
 	c_len = sizeof(client);
 
 	// Get first true request
 	while (1) {
+		timing = recvest_from_TimeOut_UDP(sock, time);
 
+		switch (timing) {
+
+			//----------------------------------------------------------------------
+			// A timeout is coming
+		case 0:
+			code = 5;
+			goto close_all;						// Close everything
+			break;
+
+			//----------------------------------------------------------------------
+			// An error has occurred
+		case -1:
+			code = 6;
+			goto close_all;						// Close everything
+			break;
+			
+			//----------------------------------------------------------------------
+			// Everything is ok, let's start
+		default:
+			if (errors_number > 13) {
+				code = 13;
+				goto close_all;					// Close everything
+			}
+
+			// Try to receive some data, this is a blocking call
+			if ((cnt = recvfrom(sock, (char*)&get_m, BUFLEN, 0, (struct sockaddr*)&client, &c_len)) == SOCKET_ERROR) {
+				code = 7;
+				goto close_all;					// Close everything
+			}
+
+			// Comparison of theoretical ip with real ip, if it's not the client's IP, then wait for a new request
+			if (client.sin_addr.s_addr != client_tmp.sin_addr.s_addr) {
+				errors_number++;
+				continue;
+			}
+
+			// Check for Error code and if it's an error, then close the app
+			if (ntohs(get_m.opcode) == ERROR) {
+				tftp_send_error_msg(sock, 0, (char*)"get a request with ERROR code", &client, c_len);
+				code = 8;
+				goto close_all;					// Close everything
+			}
+
+			// Check for first request
+			if (ntohs(get_m.opcode) == RRQ && block_number == 0) {
+				// Check the size of the received packet
+				if (cnt < 9) {
+					continue;
+				}
+
+				// Check the file and if the file is valid, send the first packet
+				if ((fd = file_open_by_request(&get_m, cnt, client, sock, dir)) == NULL) {
+					code = 11;
+					errors_number++;
+					continue;
+				}
+
+				// Rebind a socket to new port
+				closesocket(sock);
+				server.sin_port = htons(PORT_2);
+
+				if ((sock = (int)socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == INVALID_SOCKET) {
+					code = 3;
+					goto close_all;				// Close everything
+				}
+
+				// Bind the socket.
+				if (bind(sock, (struct sockaddr*)&server, sizeof(server)) == SOCKET_ERROR) {
+					code = 4;
+					goto close_all;				// Close everything
+				}
+			}
+
+			//--------------------------------------------------------------
+			// Check for incorrect ACK
+			if (ntohs(get_m.opcode) == ACK) {
+
+				// Check if block number in ACK is correct
+				if (ntohs(get_m.ack.block_number) == block_number - 1) {
+
+					// Resend last packet and increment error count
+					if ((cnt = sendto(sock, (char*)&send_m, 4 + dlen, 0, (struct sockaddr*)&client, c_len)) < 0) {
+						code = 9;
+						goto close_all;
+					}
+
+					errors_number++;
+					continue;
+				}
+
+				// Check if ACK block number is incorrect
+				if (ntohs(get_m.ack.block_number) != block_number) {
+					// Send error message and close connection
+					tftp_send_error_msg(sock, 5, (char*)"invalid ack number", &client, c_len);
+					code = 10;
+					goto close_all;				// Close everything
+				}
+
+				// Check if all data has been sent and close connection
+				if (dlen < BUFLEN && block_number > 0) {
+					if (fclose(fd))
+						code = 13;
+					else
+						code = 0;
+					goto close_all;
+				}
+			}
+
+			//--------------------------------------------------------------
+			// Read next block of data from file
+			dlen = (int)(fread(send_m.data.data, 1, sizeof(data), fd));
+
+			// Check for errors while reading from file
+			if ((dlen != sizeof(data)) && (ferror(fd))) {
+				tftp_send_error_msg(sock, 6, (char*)"Error of opening file", &client, c_len);
+				code = 11;
+				goto close_all;
+			}
+
+			// Send data packet with next block number
+			block_number++;
+
+			send_m.opcode = htons(DATA);
+			send_m.data.block_number = htons(block_number);
+
+			// Send data packet to client
+			if ((cnt = sendto(sock, (char*)&send_m, 4 + dlen, 0, (struct sockaddr*)&client, c_len)) < 0) {
+				code = 9;
+				goto close_all;
+			}
+		}
 	}
 close_all:
 

@@ -3,6 +3,10 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
 
+#My ignores
+Win_TFTP_project_on_c\x64
+x64
+
 # User-specific files
 *.rsuser
 *.suo
@@ -396,3 +400,4 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
