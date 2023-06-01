@@ -5,20 +5,20 @@ This repository contains a collection of projects written in the C programming l
 ## Linux Projects in C
 (Insert a description of each project, its purpose, and the technologies used. Unfortunately, without access to the code, this is difficult to automatically generate)
 
-[eserv](https://github.com/n00rd1/test_c_cpp_projects_on_VS2022_by_N00rd1/tree/master/Linux_project_on_c/eserv)
+([eserv](https://github.com/n00rd1/test_c_cpp_projects_on_VS2022_by_N00rd1/tree/master/Linux_project_on_c/eserv))
 This repository, named "eserv", is a collection of Linux projects written in the C programming language. The main focus of this repository is the implementation of a UDP speed test tool. This tool, written in C, measures the performance of UDP traffic between two endpoints over a network. It is especially useful for performance testing, network troubleshooting, and for learning about the UDP protocol and socket programming in Linux.
 
-[ping_utility](https://github.com/n00rd1/test_c_cpp_projects_on_VS2022_by_N00rd1/tree/master/Linux_project_on_c/ping_utility)
+([ping_utility](https://github.com/n00rd1/test_c_cpp_projects_on_VS2022_by_N00rd1/tree/master/Linux_project_on_c/ping_utility))
 This repository contains a C implementation of the `ping` utility, based on BusyBox's `ping` utility, specifically version 1.36.0&#8203;``oaicite:{"number":1,"metadata":{"title":"BusyBox","url":"https://www.busybox.net/","text":"3 January 2023 -- BusyBox 1.36.0 (unstable) BusyBox 1.36.0","pub_date":null}}``&#8203;.
 
-[pingtest](https://github.com/n00rd1/test_c_cpp_projects_on_VS2022_by_N00rd1/tree/master/Linux_project_on_c/pingtest))
+([pingtest](https://github.com/n00rd1/test_c_cpp_projects_on_VS2022_by_N00rd1/tree/master/Linux_project_on_c/pingtest))
 This repository contains a C implementation of a network latency test utility, similar to the `ping` utility, but designed for more specific testing requirements.
 
 ## Windows Projects in C
 These projects implement networking functions in the C programming language for the Windows operating system, notably using Winsock for network operations.
 
-[Win_Old_TFTP_project.c](link to file) - This project implements the Trivial File Transfer Protocol (TFTP). TFTP is a simple file transfer protocol often used for booting or loading files onto embedded systems.
-[Win_TFTP_project_on_c.c](link to file) - (Project description here. If this is also related to TFTP, you can explain how this project differs from the previous one)
+([Win_Old_TFTP_project.c](https://github.com/n00rd1/test_c_cpp_projects_on_VS2022_by_N00rd1/blob/master/Win_TFTP_project_on_c/Win_Old_TFTP_project.c)) - This project implements the Trivial File Transfer Protocol (TFTP). TFTP is a simple file transfer protocol often used for booting or loading files onto embedded systems.
+([Win_TFTP_project_on_c.c](https://github.com/n00rd1/test_c_cpp_projects_on_VS2022_by_N00rd1/blob/master/Win_TFTP_project_on_c/Win_TFTP_project_on_c.c)) - (Project description here. If this is also related to TFTP, you can explain how this project differs from the previous one)
 
 ## [eserv](https://github.com/n00rd1/test_c_cpp_projects_on_VS2022_by_N00rd1/tree/master/Linux_project_on_c/eserv)
 To compile and run the software in this repository, you need to have GCC installed in your Linux environment. Once you have ensured that GCC is installed, you can compile the software using the provided Makefile. Just type make release in the terminal to clean any previously compiled binaries and then compile the main.c file into a new binary named "eserv".
